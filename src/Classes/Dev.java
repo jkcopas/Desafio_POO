@@ -1,18 +1,44 @@
 package src.Classes;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
-
+import java.util.*;
 public class Dev {
-    private String nome; 
-    private Set<Conteudo> conteudosInscritos = new LinkedHashSet<>(); 
-    private Set<Conteudo> conteudosConcluidos = new LinkedHashSet<>(); 
-    
-    public void inscreverBootcamp(Bootcamp bootcamp){}
+    private String nome;
+    private Set<Conteudo> conteudosInscritos = new LinkedHashSet<>();
+    private Set<Conteudo> conteudosConcluidos = new LinkedHashSet<>();
 
-    public void progredir(){}
+    public void inscreverBootcamp(Bootcamp bootcamp){
+        this.conteudosInscritos.addAll(bootcamp.getConteudos());
+        bootcamp.getDevsInscritos().add(this);
+    }
 
-    public void calcularTotalXp(){}
+    public void progredir() {
+        Optional<Conteudo> conteudo = this.conteudosInscritos.stream().findFirst();
+        if(conteudo.isPresent()) {
+            this.conteudosConcluidos.add(conteudo.get());
+            this.conteudosInscritos.remove(conteudo.get());
+        } else {
+            System.err.println("Você não está matriculado em nenhum conteúdo!");
+        }
+    }
+
+    public double calcularTotalXp() {
+        Iterator<Conteudo> iterator = this.conteudosConcluidos.iterator();
+        double soma = 0;
+        while(iterator.hasNext()){
+            double next = iterator.next().calcularXp();
+            soma += next;
+        }
+        return soma;
+
+        /*return this.conteudosConcluidos
+                .stream()
+                .mapToDouble(Conteudo::calcularXp)
+                .sum();*/
+    }
+
 
     public String getNome() {
         return nome;
@@ -39,42 +65,15 @@ public class Dev {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((nome == null) ? 0 : nome.hashCode());
-        result = prime * result + ((conteudosInscritos == null) ? 0 : conteudosInscritos.hashCode());
-        result = prime * result + ((conteudosConcluidos == null) ? 0 : conteudosConcluidos.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Dev dev = (Dev) o;
+        return Objects.equals(nome, dev.nome) && Objects.equals(conteudosInscritos, dev.conteudosInscritos) && Objects.equals(conteudosConcluidos, dev.conteudosConcluidos);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Dev other = (Dev) obj;
-        if (nome == null) {
-            if (other.nome != null)
-                return false;
-        } else if (!nome.equals(other.nome))
-            return false;
-        if (conteudosInscritos == null) {
-            if (other.conteudosInscritos != null)
-                return false;
-        } else if (!conteudosInscritos.equals(other.conteudosInscritos))
-            return false;
-        if (conteudosConcluidos == null) {
-            if (other.conteudosConcluidos != null)
-                return false;
-        } else if (!conteudosConcluidos.equals(other.conteudosConcluidos))
-            return false;
-        return true;
+    public int hashCode() {
+        return Objects.hash(nome, conteudosInscritos, conteudosConcluidos);
     }
-
-    
-
 }
